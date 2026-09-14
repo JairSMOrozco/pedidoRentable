@@ -202,6 +202,12 @@
                 android:layout_marginStart="4dp" />
 
         </LinearLayout>
+        <Button
+            android:id="@+id/btnRestaurantes"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:text="RESTAURANTES"
+            android:layout_marginTop="12dp"/>
 
         <Button
             android:id="@+id/btnCerrarJornada"

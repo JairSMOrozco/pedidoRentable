@@ -47,6 +47,8 @@ public class MainActivity extends AppCompatActivity {
 
     private Button btnCerrarJornada;
 
+    private Button btnRestaurantes;
+
     /*private Button btnBorrarPruebas;*/
 
 
@@ -127,6 +129,8 @@ public class MainActivity extends AppCompatActivity {
         btnConfiguracion =
                 findViewById(R.id.btnConfiguracion);
 
+        btnRestaurantes = findViewById(R.id.btnRestaurantes);
+
         btnCerrarJornada =
                 findViewById(R.id.btnCerrarJornada);
 
@@ -170,6 +174,17 @@ public class MainActivity extends AppCompatActivity {
                     new Intent(
                             MainActivity.this,
                             ConfiguracionActivity.class
+                    );
+
+            startActivity(intent);
+        });
+
+        btnRestaurantes.setOnClickListener(v -> {
+
+            Intent intent =
+                    new Intent(
+                            MainActivity.this,
+                            RestauranteActivity.class
                     );
 
             startActivity(intent);

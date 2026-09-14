@@ -13,9 +13,18 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "pedidos.db";
 
     // Cambiamos de versión 1 a versión 2
-    private static final int DATABASE_VERSION = 2;
+    private static final int DATABASE_VERSION = 3;
 
     public static final String TABLE_PEDIDOS = "pedidos";
+
+    // TABLA DE RESTAURANTES
+    public static final String TABLE_RESTAURANTES = "restaurantes";
+
+    public static final String COL_RESTAURANTE_ID = "id";
+    public static final String COL_RESTAURANTE_NOMBRE = "nombre";
+    public static final String COL_RESTAURANTE_LATITUD = "latitud";
+    public static final String COL_RESTAURANTE_LONGITUD = "longitud";
+    public static final String COL_RESTAURANTE_FECHA_ALTA = "fecha_alta";
 
     public static final String COL_ID = "id";
     public static final String COL_GANANCIA_MOSTRADA = "ganancia_mostrada";
@@ -59,6 +68,17 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                         ")";
 
         db.execSQL(crearTabla);
+
+        String crearTablaRestaurantes =
+                "CREATE TABLE " + TABLE_RESTAURANTES + " (" +
+                        COL_RESTAURANTE_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                        COL_RESTAURANTE_NOMBRE + " TEXT NOT NULL, " +
+                        COL_RESTAURANTE_LATITUD + " REAL NOT NULL, " +
+                        COL_RESTAURANTE_LONGITUD + " REAL NOT NULL, " +
+                        COL_RESTAURANTE_FECHA_ALTA + " TEXT" +
+                        ")";
+
+        db.execSQL(crearTablaRestaurantes);
     }
 
     @Override
@@ -68,7 +88,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             int newVersion
     ) {
 
-        // NO BORRAMOS LA TABLA
+        // Versión 1 -> 2
+        // Añadimos timestamp de inicio sin borrar pedidos.
         if (oldVersion < 2) {
 
             db.execSQL(
@@ -78,6 +99,28 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                             COL_TIMESTAMP_INICIO +
                             " INTEGER DEFAULT 0"
             );
+        }
+
+        // Versión 2 -> 3
+        // Creamos la tabla de restaurantes sin modificar la tabla de pedidos.
+        if (oldVersion < 3) {
+
+            String crearTablaRestaurantes =
+                    "CREATE TABLE IF NOT EXISTS " +
+                            TABLE_RESTAURANTES + " (" +
+                            COL_RESTAURANTE_ID +
+                            " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                            COL_RESTAURANTE_NOMBRE +
+                            " TEXT NOT NULL, " +
+                            COL_RESTAURANTE_LATITUD +
+                            " REAL NOT NULL, " +
+                            COL_RESTAURANTE_LONGITUD +
+                            " REAL NOT NULL, " +
+                            COL_RESTAURANTE_FECHA_ALTA +
+                            " TEXT" +
+                            ")";
+
+            db.execSQL(crearTablaRestaurantes);
         }
     }
 
@@ -564,4 +607,99 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 null
         );
     }
+
+    public long insertarRestaurante(
+            String nombre,
+            double latitud,
+            double longitud,
+            String fechaAlta
+    ) {
+
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+
+        values.put(COL_RESTAURANTE_NOMBRE, nombre);
+        values.put(COL_RESTAURANTE_LATITUD, latitud);
+        values.put(COL_RESTAURANTE_LONGITUD, longitud);
+        values.put(COL_RESTAURANTE_FECHA_ALTA, fechaAlta);
+
+        return db.insert(
+                TABLE_RESTAURANTES,
+                null,
+                values
+        );
+    }
+
+
+    public List<Restaurante> obtenerRestaurantes() {
+
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        List<Restaurante> lista = new ArrayList<>();
+
+        Cursor cursor = db.query(
+                TABLE_RESTAURANTES,
+                null,
+                null,
+                null,
+                null,
+                null,
+                COL_RESTAURANTE_NOMBRE + " ASC"
+        );
+
+        while (cursor.moveToNext()) {
+
+            long id =
+                    cursor.getLong(
+                            cursor.getColumnIndexOrThrow(
+                                    COL_RESTAURANTE_ID
+                            )
+                    );
+
+            String nombre =
+                    cursor.getString(
+                            cursor.getColumnIndexOrThrow(
+                                    COL_RESTAURANTE_NOMBRE
+                            )
+                    );
+
+            double latitud =
+                    cursor.getDouble(
+                            cursor.getColumnIndexOrThrow(
+                                    COL_RESTAURANTE_LATITUD
+                            )
+                    );
+
+            double longitud =
+                    cursor.getDouble(
+                            cursor.getColumnIndexOrThrow(
+                                    COL_RESTAURANTE_LONGITUD
+                            )
+                    );
+
+            String fechaAlta =
+                    cursor.getString(
+                            cursor.getColumnIndexOrThrow(
+                                    COL_RESTAURANTE_FECHA_ALTA
+                            )
+                    );
+
+            lista.add(
+                    new Restaurante(
+                            id,
+                            nombre,
+                            latitud,
+                            longitud,
+                            fechaAlta
+                    )
+            );
+        }
+
+        cursor.close();
+
+        return lista;
+    }
+
+
 }
